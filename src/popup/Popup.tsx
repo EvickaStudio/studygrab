@@ -1,5 +1,4 @@
 import React from 'react';
-
 import Hello from '@components/Hello';
 import browser, { Tabs } from 'webextension-polyfill';
 import Scroller from '@components/Scroller';
@@ -28,7 +27,7 @@ async function executeScript(code: string): Promise<void> {
 
         console.log(currentTab.url);
 
-        if (currentTab.url?.includes('github')) {
+        if (currentTab.url?.includes('')) {
             console.log('Where on github');
 
             await browser.tabs.executeScript(currentTab.id, {
@@ -48,6 +47,22 @@ const Popup = () => {
         browser.runtime.sendMessage({ popupMounted: true });
     }, []);
 
+    // // Load the blocking state from storage when the popup is opened
+    // React.useEffect(() => {
+    //     browser.storage.local.get('blockingEnabled').then(({ blockingEnabled }) => {
+    //         setBlockingEnabled(blockingEnabled ?? true);
+    //     });
+    //     browser.runtime.sendMessage({ popupMounted: true });
+    // }, []);
+
+    // State variable for blocking
+    const [blockingEnabled, setBlockingEnabled] = React.useState(true);
+
+    // // Save the blocking state to storage when it changes
+    // React.useEffect(() => {
+    //     browser.storage.local.set({ blockingEnabled });
+    // }, [blockingEnabled]);
+
     // Renders the component tree
     return (
         <div className="popupContainer">
@@ -62,6 +77,16 @@ const Popup = () => {
                         executeScript(scrollToBottomScript);
                     }}
                 />
+                <button
+                    className="btn"
+                    onClick={() => {
+                        setBlockingEnabled(!blockingEnabled);
+                        // Send a message to the background script with the new blocking status
+                        browser.runtime.sendMessage({ toggleBlocking: !blockingEnabled });
+                    }}
+                >
+                    {blockingEnabled ? 'Disable Blocking' : 'Enable Blocking'}
+                </button>
             </div>
         </div>
     );
